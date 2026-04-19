@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "watch": "vite --host 0.0.0.0 --port 5173",
     "preview": "vite preview",
     "type-check": "vue-tsc --noEmit -p tsconfig.app.json",
     "lint": "eslint . --ext .ts,.vue",
@@ -33,7 +34,6 @@
     "typescript": "^5.5.4",
     "typescript-eslint": "^8.46.2",
     "vite": "^8.0.8",
-    "vite-plugin-vue-devtools": "^7.3.0",
     "vue-eslint-parser": "^10.4.0",
     "vue-tsc": "^2.0.29"
   },
