@@ -9,6 +9,7 @@
       "@router/*": [ "./src/router/*" ],
       "@api/*": [ "./src/shared/api" ],
       "@ui/*": [ "./src/shared/components" ],
+      "@stores/*": [ "./src/stores/*" ],
     },
     "types": [
       "vite/client",

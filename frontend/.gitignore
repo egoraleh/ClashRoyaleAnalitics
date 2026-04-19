@@ -7,3 +7,4 @@ coverage
 .eslintcache
 package-lock.json
 yarn.lock
+public/build

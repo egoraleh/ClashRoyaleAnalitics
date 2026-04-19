@@ -14,7 +14,12 @@ export default defineConfig({
             '@router': fileURLToPath(new URL('./src/router', import.meta.url)),
             '@api': fileURLToPath(new URL('./src/shared/api', import.meta.url)),
             '@ui': fileURLToPath(new URL('./src/shared/components', import.meta.url)),
+            '@stores': fileURLToPath(new URL('./src/stores', import.meta.url)),
         },
+    },
+    build: {
+        outDir: 'public/build',
+        emptyOutDir: true,
     },
     server: {
         host: true,
