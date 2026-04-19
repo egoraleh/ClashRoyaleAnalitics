@@ -22,6 +22,17 @@
                     </label>
 
                     <label class="auth-form__field">
+                        <span>Player Tag</span>
+                        <input
+                            v-model.trim="playerTag"
+                            type="text"
+                            name="playerTag"
+                            placeholder="#2ABCDEF"
+                            required
+                        >
+                    </label>
+
+                    <label class="auth-form__field">
                         <span>Email</span>
                         <input
                             v-model.trim="email"
@@ -42,17 +53,6 @@
                             autocomplete="new-password"
                             placeholder="Минимум 6 символов"
                             minlength="6"
-                            required
-                        >
-                    </label>
-
-                    <label class="auth-form__field">
-                        <span>Player Tag</span>
-                        <input
-                            v-model.trim="playerTag"
-                            type="text"
-                            name="playerTag"
-                            placeholder="#2ABCDEF"
                             required
                         >
                     </label>
