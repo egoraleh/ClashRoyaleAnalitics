@@ -1,0 +1,25 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@styles/*": [ "./src/styles/*" ],
+      "@components/*": [ "./src/components/*" ],
+      "@pages/*": [ "./src/pages/*" ],
+      "@router/*": [ "./src/router/*" ],
+      "@api/*": [ "./src/shared/api" ],
+      "@ui/*": [ "./src/shared/components" ],
+    },
+    "types": [
+      "vite/client",
+    ],
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.vue",
+    "src/**/*.d.ts",
+    "src/**/*.scss",
+  ],
+}
