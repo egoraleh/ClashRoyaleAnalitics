@@ -5,26 +5,26 @@ import tseslint from 'typescript-eslint';
 import vueParser from 'vue-eslint-parser';
 
 const sharedRules = {
-    quotes: ['warning', 'single', { avoidEscape: true }],
-    semi: ['warning', 'always'],
-    'comma-dangle': ['warning', 'always-multiline'],
-    indent: ['warning', 4, { SwitchCase: 1 }],
-    curly: ['warning', 'all'],
+    quotes: ['error', 'single', { avoidEscape: true }],
+    semi: ['error', 'always'],
+    'comma-dangle': ['error', 'always-multiline'],
+    indent: ['error', 4, { SwitchCase: 1 }],
+    curly: ['error', 'all'],
     'no-console': ['error', { allow: ['error'] }],
-    'no-multi-spaces': 'warning',
-    'no-trailing-spaces': 'warning',
+    'no-multi-spaces': 'error',
+    'no-trailing-spaces': 'error',
     'eol-last': ['error', 'always'],
     'object-curly-spacing': ['error', 'always'],
     'array-bracket-spacing': ['error', 'never'],
     'space-in-parens': ['error', 'never'],
-    'keyword-spacing': 'warning',
-    'comma-spacing': ['warning', { before: false, after: true }],
-    'arrow-spacing': ['warning', { before: true, after: true }],
+    'keyword-spacing': 'error',
+    'comma-spacing': ['error', { before: false, after: true }],
+    'arrow-spacing': ['error', { before: true, after: true }],
     'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 1 }],
     'no-await-in-loop': 'error',
     'func-style': ['error', 'expression', { allowArrowFunctions: true }],
-    'simple-import-sort/imports': 'warning',
-    'simple-import-sort/exports': 'warning',
+    'simple-import-sort/imports': 'error',
+    'simple-import-sort/exports': 'error',
 };
 
 export default [
@@ -46,7 +46,16 @@ export default [
                 sourceType: 'module',
             },
         },
-        rules: sharedRules,
+        rules: {
+            ...sharedRules,
+            '@typescript-eslint/no-unused-vars': [
+                'error',
+                {
+                    argsIgnorePattern: '^_',
+                    varsIgnorePattern: '^_',
+                },
+            ],
+        },
     },
     {
         files: ['**/*.vue'],
@@ -64,18 +73,25 @@ export default [
         },
         rules: {
             ...sharedRules,
+            '@typescript-eslint/no-unused-vars': [
+                'error',
+                {
+                    argsIgnorePattern: '^_',
+                    varsIgnorePattern: '^_',
+                },
+            ],
             indent: 'off',
-            'vue/html-indent': ['warning', 4],
-            'vue/script-indent': ['warning', 4, { baseIndent: 0, switchCase: 1 }],
+            'vue/html-indent': ['error', 4],
+            'vue/script-indent': ['error', 4, { baseIndent: 0, switchCase: 1 }],
             'vue/max-attributes-per-line': [
-                'warning',
+                'error',
                 {
                     singleline: 3,
                     multiline: 1,
                 },
             ],
             'vue/html-closing-bracket-newline': [
-                'warning',
+                'error',
                 {
                     singleline: 'never',
                     multiline: 'always',
