@@ -5,9 +5,9 @@ export const useUserStore = defineStore('user', () => {
     const playerName = ref<string>('');
     const playerTag = ref<string>('');
 
-    const getPlayerName = computed<string>(() => playerName.value);
+    const playerNameValue = computed<string>(() => playerName.value);
 
-    const getPlayerTag = computed<string>(() => playerTag.value);
+    const playerTagValue = computed<string>(() => playerTag.value);
 
     const setPlayerTag = (value: string) => {
         playerTag.value = value.trim().toUpperCase();
@@ -18,8 +18,9 @@ export const useUserStore = defineStore('user', () => {
     };
 
     return {
-        getPlayerName,
-        getPlayerTag,
+        playerNameValue,
+        playerTagValue,
+
         setPlayerTag,
         setPlayerName,
     };

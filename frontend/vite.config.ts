@@ -14,6 +14,7 @@ export default defineConfig({
             '@api': fileURLToPath(new URL('./src/shared/api', import.meta.url)),
             '@ui': fileURLToPath(new URL('./src/shared/components', import.meta.url)),
             '@stores': fileURLToPath(new URL('./src/stores', import.meta.url)),
+            '@utils': fileURLToPath(new URL('./src/shared/utils', import.meta.url)),
         },
     },
     build: {

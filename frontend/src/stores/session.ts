@@ -5,9 +5,9 @@ export const useSessionStore = defineStore('app', () => {
     const accessToken = ref<string>(localStorage.getItem('accessToken') as string);
     const refreshToken = ref<string>(localStorage.getItem('refreshToken') as string);
 
-    const getAccessToken = computed((): string => accessToken.value);
+    const accessTokenValue = computed((): string => accessToken.value);
 
-    const getRefreshToken = computed((): string => refreshToken.value);
+    const refreshTokenValue = computed((): string => refreshToken.value);
 
     const setAccessToken = (value: string) => {
         accessToken.value = value.trim();
@@ -17,10 +17,19 @@ export const useSessionStore = defineStore('app', () => {
         refreshToken.value = value.trim();
     };
 
+    const clearTokens = () => {
+        accessToken.value = '';
+        refreshToken.value = '';
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+    };
+
     return {
-        getAccessToken,
-        getRefreshToken,
+        accessTokenValue,
+        refreshTokenValue,
+
         setAccessToken,
         setRefreshToken,
+        clearTokens,
     };
 });
