@@ -39,26 +39,33 @@
                         size="lg"
                         wide
                     >
-                        Sign in
+                        Войти
                     </AppButton>
                 </form>
             </div>
 
             <aside class="auth-card__aside">
-                <p class="auth-card__aside-label">
-                    Нет аккаунта?
-                </p>
-                <AppLink
-                    class="auth-card__link"
-                    as-child
-                    size="md"
-                    theme="primary"
-                    decoration="pill"
+                <img
+                    class="auth-card__aside-logo"
+                    src="/logo.png"
+                    alt="Clash Royale Analytics"
                 >
-                    <RouterLink :to="{ name: 'register' }">
-                        Перейти к регистрации
-                    </RouterLink>
-                </AppLink>
+                <div>
+                    <p class="auth-card__aside-label">
+                        Нет аккаунта?
+                    </p>
+                    <AppLink
+                        class="auth-card__link"
+                        as-child
+                        size="md"
+                        theme="secondary"
+                        decoration="pill"
+                    >
+                        <RouterLink :to="{ name: 'register' }">
+                            Перейти к регистрации
+                        </RouterLink>
+                    </AppLink>
+                </div>
             </aside>
         </div>
     </section>

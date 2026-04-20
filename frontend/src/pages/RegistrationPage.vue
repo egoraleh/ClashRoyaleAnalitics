@@ -68,26 +68,33 @@
                         size="lg"
                         wide
                     >
-                        Create account
+                        Зарегестрироваться
                     </AppButton>
                 </form>
             </div>
 
             <aside class="auth-card__aside">
-                <p class="auth-card__aside-label">
-                    Уже есть аккаунт?
-                </p>
-                <AppLink
-                    class="auth-card__link"
-                    as-child
-                    size="md"
-                    theme="secondary"
-                    decoration="pill"
+                <img
+                    class="auth-card__aside-logo"
+                    src="/logo.png"
+                    alt=""
                 >
-                    <RouterLink :to="{ name: 'login' }">
-                        Перейти ко входу
-                    </RouterLink>
-                </AppLink>
+                <div>
+                    <p class="auth-card__aside-label">
+                        Уже есть аккаунт?
+                    </p>
+                    <AppLink
+                        class="auth-card__link"
+                        as-child
+                        size="md"
+                        theme="secondary"
+                        decoration="pill"
+                    >
+                        <RouterLink :to="{ name: 'login' }">
+                            Перейти ко входу
+                        </RouterLink>
+                    </AppLink>
+                </div>
             </aside>
         </div>
     </section>
@@ -121,7 +128,6 @@ const playerTagCleanupPattern = /[^#A-Za-z0-9]/g;
 
 .auth-card--register {
     width: min(100%, 1080px);
-    grid-template-columns: minmax(0, 1.3fr) minmax(240px, 0.7fr);
 }
 
 .auth-card--register .auth-card__aside {

@@ -10,7 +10,7 @@
 .auth-card {
     width: min(100%, 960px);
     display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(240px, 0.8fr);
+    grid-template-columns: auto min-content;
     border: 1px solid $color-border;
     border-radius: 28px;
     overflow: hidden;
@@ -23,17 +23,28 @@
 }
 
 .auth-card__aside {
-    display: grid;
-    align-content: end;
-    gap: 12px;
-    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 32px;
     background:
         linear-gradient(180deg, rgba($color-accent, 0.08), rgba($color-accent-secondary, 0.08)),
         rgba(255, 255, 255, 0.02);
+    text-align: center;
+}
+
+.auth-card__aside-logo {
+    width: min(200px, 100%);
+    align-self: center;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.24));
 }
 
 .auth-card__title {
-    margin: 0 0 12px;
+    margin: 0;
+    padding: 0 0 24px;
     color: $color-text;
     font-size: clamp(2rem, 4vw, 3rem);
     line-height: 1;
@@ -42,6 +53,12 @@
 .auth-card__aside-label {
     margin: 0;
     color: rgba($color-text, 0.6);
+    line-height: 1.5;
+}
+
+.auth-card__link {
+    white-space: nowrap;
+    width: fit-content;
 }
 
 .auth-form {
