@@ -4,6 +4,33 @@ import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import tseslint from 'typescript-eslint';
 import vueParser from 'vue-eslint-parser';
 
+const browserGlobals = {
+    AbortController: 'readonly',
+    Blob: 'readonly',
+    console: 'readonly',
+    CustomEvent: 'readonly',
+    document: 'readonly',
+    Event: 'readonly',
+    fetch: 'readonly',
+    FormData: 'readonly',
+    HTMLButtonElement: 'readonly',
+    HTMLElement: 'readonly',
+    HTMLFormElement: 'readonly',
+    HTMLInputElement: 'readonly',
+    localStorage: 'readonly',
+    location: 'readonly',
+    MouseEvent: 'readonly',
+    navigator: 'readonly',
+    Node: 'readonly',
+    Request: 'readonly',
+    Response: 'readonly',
+    setInterval: 'readonly',
+    setTimeout: 'readonly',
+    URL: 'readonly',
+    URLSearchParams: 'readonly',
+    window: 'readonly',
+};
+
 const sharedRules = {
     quotes: ['error', 'single', { avoidEscape: true }],
     semi: ['error', 'always'],
@@ -27,6 +54,27 @@ const sharedRules = {
     'simple-import-sort/exports': 'error',
 };
 
+const sharedTypeScriptRules = {
+    ...sharedRules,
+    indent: 'off',
+    'no-undef': 'off',
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+            argsIgnorePattern: '^_',
+            varsIgnorePattern: '^_',
+        },
+    ],
+};
+
+const sharedTypeScriptLanguageOptions = {
+    parser: tseslint.parser,
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+    globals: browserGlobals,
+};
+
 export default [
     {
         ignores: ['dist/**', 'public/build/**', 'node_modules/**', 'coverage/**'],
@@ -35,26 +83,15 @@ export default [
     ...tseslint.configs.recommended,
     ...pluginVue.configs['flat/recommended'],
     {
-        files: ['**/*.ts'],
+        files: ['**/*.{ts,tsx,d.ts}'],
         plugins: {
             'simple-import-sort': simpleImportSort,
         },
         languageOptions: {
-            parser: tseslint.parser,
-            parserOptions: {
-                ecmaVersion: 'latest',
-                sourceType: 'module',
-            },
+            ...sharedTypeScriptLanguageOptions,
         },
         rules: {
-            ...sharedRules,
-            '@typescript-eslint/no-unused-vars': [
-                'error',
-                {
-                    argsIgnorePattern: '^_',
-                    varsIgnorePattern: '^_',
-                },
-            ],
+            ...sharedTypeScriptRules,
         },
     },
     {
@@ -70,17 +107,10 @@ export default [
                 sourceType: 'module',
                 extraFileExtensions: ['.vue'],
             },
+            globals: browserGlobals,
         },
         rules: {
-            ...sharedRules,
-            '@typescript-eslint/no-unused-vars': [
-                'error',
-                {
-                    argsIgnorePattern: '^_',
-                    varsIgnorePattern: '^_',
-                },
-            ],
-            indent: 'off',
+            ...sharedTypeScriptRules,
             'vue/html-indent': ['error', 4],
             'vue/script-indent': ['error', 4, { baseIndent: 0, switchCase: 1 }],
             'vue/max-attributes-per-line': [

@@ -9,31 +9,38 @@
                 <form class="auth-form">
                     <label class="auth-form__field">
                         <span>Username</span>
-                        <input
+                        <AppInput
                             v-model.trim="username"
                             type="text"
                             name="username"
                             autocomplete="username"
                             placeholder="Введите username"
+                            size="lg"
                             required
-                        >
+                        />
                     </label>
 
                     <label class="auth-form__field">
                         <span>Password</span>
-                        <input
+                        <AppInput
                             v-model.trim="password"
                             type="password"
                             name="password"
                             autocomplete="current-password"
                             placeholder="Введите пароль"
+                            size="lg"
                             required
-                        >
+                        />
                     </label>
 
-                    <button class="auth-form__submit" type="submit">
+                    <AppButton
+                        class="auth-form__submit"
+                        type="submit"
+                        size="lg"
+                        wide
+                    >
                         Sign in
-                    </button>
+                    </AppButton>
                 </form>
             </div>
 
@@ -41,15 +48,28 @@
                 <p class="auth-card__aside-label">
                     Нет аккаунта?
                 </p>
-                <RouterLink class="auth-card__link" :to="{ name: 'register' }">
-                    Перейти к регистрации
-                </RouterLink>
+                <AppLink
+                    class="auth-card__link"
+                    as-child
+                    size="md"
+                    theme="primary"
+                    decoration="pill"
+                >
+                    <RouterLink :to="{ name: 'register' }">
+                        Перейти к регистрации
+                    </RouterLink>
+                </AppLink>
             </aside>
         </div>
     </section>
 </template>
 
 <script setup lang="ts">
+import {
+    AppButton,
+    AppInput,
+    AppLink,
+} from '@ui';
 import { ref } from 'vue';
 import { RouterLink } from 'vue-router';
 

@@ -9,57 +9,67 @@
                 <form class="auth-form auth-form--register">
                     <label class="auth-form__field">
                         <span>Username</span>
-                        <input
+                        <AppInput
                             v-model.trim="username"
                             type="text"
                             name="username"
                             autocomplete="username"
                             placeholder="Введите username"
-                            minlength="3"
-                            maxlength="50"
+                            size="lg"
+                            :minlength="3"
+                            :maxlength="50"
                             required
-                        >
+                        />
                     </label>
 
                     <label class="auth-form__field">
                         <span>Player Tag</span>
-                        <input
+                        <AppInput
                             v-model.trim="playerTag"
                             type="text"
                             name="playerTag"
                             placeholder="#2ABCDEF"
+                            size="lg"
+                            :regular="playerTagCleanupPattern"
                             required
-                        >
+                        />
                     </label>
 
                     <label class="auth-form__field">
                         <span>Email</span>
-                        <input
+                        <AppInput
                             v-model.trim="email"
                             type="email"
                             name="email"
                             autocomplete="email"
                             placeholder="Введите email"
+                            size="lg"
                             required
-                        >
+                        />
                     </label>
 
                     <label class="auth-form__field">
                         <span>Password</span>
-                        <input
+                        <AppInput
                             v-model="password"
                             type="password"
                             name="password"
                             autocomplete="new-password"
                             placeholder="Минимум 6 символов"
-                            minlength="6"
+                            size="lg"
+                            :minlength="6"
                             required
-                        >
+                        />
                     </label>
 
-                    <button class="auth-form__submit" type="submit">
+                    <AppButton
+                        class="auth-form__submit"
+                        type="submit"
+                        size="lg"
+                        wide
+                    >
                         Create account
-                    </button>
+                    </AppButton>
                 </form>
             </div>
 
@@ -67,9 +77,17 @@
                 <p class="auth-card__aside-label">
                     Уже есть аккаунт?
                 </p>
-                <RouterLink class="auth-card__link" :to="{ name: 'login' }">
-                    Перейти ко входу
-                </RouterLink>
+                <AppLink
+                    class="auth-card__link"
+                    as-child
+                    size="md"
+                    theme="secondary"
+                    decoration="pill"
+                >
+                    <RouterLink :to="{ name: 'login' }">
+                        Перейти ко входу
+                    </RouterLink>
+                </AppLink>
             </aside>
         </div>
     </section>
@@ -79,10 +97,15 @@
 import { ref } from 'vue';
 import { RouterLink } from 'vue-router';
 
+import AppButton from '../shared/components/AppButton';
+import AppInput from '../shared/components/AppInput';
+import AppLink from '../shared/components/AppLink';
+
 const username = ref<string>('');
 const email = ref<string>('');
 const password = ref<string>('');
 const playerTag = ref<string>('');
+const playerTagCleanupPattern = /[^#A-Za-z0-9]/g;
 </script>
 
 <style scoped lang="scss">

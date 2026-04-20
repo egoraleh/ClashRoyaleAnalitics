@@ -44,15 +44,6 @@
     color: rgba($color-text, 0.6);
 }
 
-.auth-card__link {
-    width: fit-content;
-    padding: 12px 18px;
-    border-radius: 999px;
-    color: $color-bg;
-    font-weight: 700;
-    background: $color-accent;
-}
-
 .auth-form {
     display: grid;
     gap: 18px;
@@ -67,35 +58,6 @@
     color: $color-text;
     font-size: 0.95rem;
     font-weight: 600;
-}
-
-.auth-form__field input {
-    width: 100%;
-    padding: 14px 16px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    color: $color-text;
-    background: rgba(255, 255, 255, 0.04);
-    outline: none;
-}
-
-.auth-form__field input::placeholder {
-    color: rgba($color-text, 0.36);
-}
-
-.auth-form__field input:focus {
-    border-color: rgba($color-accent, 0.56);
-}
-
-.auth-form__submit {
-    padding: 14px 18px;
-    border: 0;
-    border-radius: 16px;
-    color: $color-bg;
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    background: linear-gradient(135deg, $color-accent 0%, #ffdb92 100%);
 }
 
 @media (max-width: 860px) {
