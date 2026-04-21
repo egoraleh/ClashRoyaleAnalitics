@@ -1,2 +1,4 @@
 .idea
 cr.yaml
+.DS_Store
+node_modules
