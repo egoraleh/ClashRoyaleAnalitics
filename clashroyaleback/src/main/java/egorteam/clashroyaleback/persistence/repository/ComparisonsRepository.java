@@ -1,0 +1,10 @@
+package egorteam.clashroyaleback.persistence.repository;
+
+import egorteam.clashroyaleback.persistence.entity.ComparisonEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface ComparisonsRepository extends JpaRepository<ComparisonEntity, Long> {
+    List<ComparisonEntity> findByPlayerTagOrderByCreatedAtDesc(String playerTag);
+}
