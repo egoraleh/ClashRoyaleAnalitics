@@ -1,3 +1,16 @@
 @import './fonts.css';
 @import './tailwind.css';
 @import './theme.css';
+
+html,
+body,
+#root {
+    height: 100%;
+    margin: 0;
+}
+
+.chart-tooltip {
+    background: #12182b;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+}
