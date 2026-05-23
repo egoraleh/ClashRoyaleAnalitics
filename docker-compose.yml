@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: clashroyale-postgres
+    environment:
+      POSTGRES_DB: clashroyale
+      POSTGRES_USER: clash
+      POSTGRES_PASSWORD: clash
+    ports:
+      - "5432:5432"
+    volumes:
+      - clashroyale_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clash -d clashroyale"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: ./clashroyaleback
+    container_name: clashroyale-back
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/clashroyale
+      SPRING_DATASOURCE_USERNAME: clash
+      SPRING_DATASOURCE_PASSWORD: clash
+      CLASH_ROYALE_API_TOKEN: ${CLASH_ROYALE_API_TOKEN:-}
+      AI_ANALYTICS_BASE_URL: ${AI_ANALYTICS_BASE_URL:-http://host.docker.internal:8000}
+      AI_ANALYTICS_GENERATE_DECK_PATH: ${AI_ANALYTICS_GENERATE_DECK_PATH:-/generate-deck}
+      AI_ANALYTICS_COMPARE_PATH: ${AI_ANALYTICS_COMPARE_PATH:-/compare}
+    ports:
+      - "8080:8080"
+
+volumes:
+  clashroyale_pgdata:
