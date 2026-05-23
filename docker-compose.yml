@@ -18,7 +18,7 @@ services:
 
   app:
     build:
-      context: ./clashroyaleback
+      context: .
     container_name: clashroyale-back
     depends_on:
       postgres:
