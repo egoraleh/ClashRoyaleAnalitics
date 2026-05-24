@@ -1,2 +1,13 @@
 .idea
 cr.yaml
+.DS_Store
+frontend/yarn.lock
+target/
+.mvn/wrapper/maven-wrapper.jar
+frontend/build/
+.vscode/
+*.iws
+*.iml
+*.ipr
+frontend/node_modules/
+frontend/dist/
