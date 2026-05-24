@@ -10,6 +10,7 @@ import egorteam.clashroyaleback.persistence.repository.AuthTokensRepository;
 import egorteam.clashroyaleback.persistence.repository.UserPreferencesRepository;
 import egorteam.clashroyaleback.persistence.repository.UsersRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,13 +25,15 @@ public class AuthService {
     private final AuthTokensRepository tokens;
     private final UserPreferencesRepository preferences;
     private final ClashRoyaleClient clashRoyaleClient;
+    private final PasswordEncoder passwordEncoder;
 
     public AuthService(UsersRepository users, AuthTokensRepository tokens, UserPreferencesRepository preferences,
-                       ClashRoyaleClient clashRoyaleClient) {
+                       ClashRoyaleClient clashRoyaleClient, PasswordEncoder passwordEncoder) {
         this.users = users;
         this.tokens = tokens;
         this.preferences = preferences;
         this.clashRoyaleClient = clashRoyaleClient;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -43,7 +46,7 @@ public class AuthService {
         user.playerTag = playerTag;
         user.username = request.username();
         user.email = request.email();
-        user.password = request.password();
+        user.password = passwordEncoder.encode(request.password());
         user.registeredAt = Instant.now();
         users.save(user);
         preferences.save(emptyPreferencesEntity(playerTag));
@@ -54,7 +57,7 @@ public class AuthService {
     public Dtos.AuthSuccessResponse login(Dtos.LoginRequest request) {
         UserEntity user = users.findByUsernameIgnoreCase(request.username())
                 .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Invalid credentials"));
-        if (!user.password.equals(request.password())) {
+        if (!passwordEncoder.matches(request.password(), user.password)) {
             throw new ApiException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
         return issueTokens(toAccount(user));

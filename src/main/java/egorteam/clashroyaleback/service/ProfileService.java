@@ -158,9 +158,18 @@ public class ProfileService {
             currentDeck = new Dtos.DeckShort(null, "Current Clash Royale deck", "CACHED_PROFILE", null, null,
                     currentDeckSource.stream().map(this::cardShortFromApi).toList());
         }
+        long recentWins = battles.stream().filter(this::isWin).count();
+        Object totalBattles = player.getOrDefault("battleCount", 0);
+        Object totalWins = player.getOrDefault("wins", 0);
+        Object totalLosses = player.getOrDefault("losses", 0);
         Map<String, Object> battleStats = Map.of(
                 "recentMatches", battles.stream().limit(10).toList(),
-                "winRate", estimateWinRate(battles)
+                "recentGames", battles.size(),
+                "recentWins", recentWins,
+                "totalBattles", totalBattles instanceof Number n ? n.intValue() : 0,
+                "totalWins", totalWins instanceof Number n ? n.intValue() : 0,
+                "totalLosses", totalLosses instanceof Number n ? n.intValue() : 0,
+                "winRate", battles.isEmpty() ? 0.0 : recentWins * 100.0 / battles.size()
         );
         return new Dtos.ProfileCache(string(player.get("name")), number(player.get("trophies")),
                 number(player.get("bestTrophies")), number(player.get("expLevel")), currentDeck,

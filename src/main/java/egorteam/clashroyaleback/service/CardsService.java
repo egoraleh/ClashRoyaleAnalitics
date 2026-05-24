@@ -6,15 +6,19 @@ import egorteam.clashroyaleback.external.ClashRoyaleClient;
 import egorteam.clashroyaleback.persistence.JsonMapper;
 import egorteam.clashroyaleback.persistence.entity.CardEntity;
 import egorteam.clashroyaleback.persistence.repository.CardsRepository;
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Service
 public class CardsService {
@@ -41,19 +45,31 @@ public class CardsService {
         seedFallbackCardsIfEmpty();
         int safePage = Math.max(page, 0);
         int safeSize = Math.max(1, Math.min(size, 100));
-        List<Dtos.Card> filtered = cards.findAll().stream()
-                .map(this::toDto)
-                .filter(card -> rarity == null || rarity.equalsIgnoreCase(card.rarity()))
-                .filter(card -> elixirMin == null || (card.elixir() != null && card.elixir() >= elixirMin))
-                .filter(card -> elixirMax == null || (card.elixir() != null && card.elixir() <= elixirMax))
-                .filter(card -> arena == null || Objects.equals(arena, card.arena()))
-                .filter(card -> search == null || card.name().toLowerCase().contains(search.toLowerCase()))
-                .sorted(Comparator.comparing(Dtos.Card::name))
-                .toList();
-        int from = Math.min(filtered.size(), safePage * safeSize);
-        int to = Math.min(filtered.size(), from + safeSize);
-        int totalPages = (int) Math.ceil(filtered.size() / (double) safeSize);
-        return new Dtos.CardsPageResponse(safePage, safeSize, filtered.size(), totalPages, filtered.subList(from, to));
+
+        Specification<CardEntity> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (rarity != null) {
+                predicates.add(cb.equal(cb.lower(root.get("rarity")), rarity.toLowerCase()));
+            }
+            if (elixirMin != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("elixir"), elixirMin));
+            }
+            if (elixirMax != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("elixir"), elixirMax));
+            }
+            if (arena != null) {
+                predicates.add(cb.equal(root.get("arena"), arena));
+            }
+            if (search != null && !search.isBlank()) {
+                predicates.add(cb.like(cb.lower(root.get("name")), "%" + search.toLowerCase() + "%"));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Page<CardEntity> result = cards.findAll(spec, PageRequest.of(safePage, safeSize, Sort.by("name")));
+        List<Dtos.Card> items = result.getContent().stream().map(this::toDto).toList();
+        return new Dtos.CardsPageResponse(result.getNumber(), result.getSize(), result.getTotalElements(),
+                result.getTotalPages(), items);
     }
 
     @Transactional

@@ -1,102 +1,42 @@
+import { useEffect, useState } from 'react';
 import { Plus, Play, Trash2, Share2 } from 'lucide-react';
-
-const decks = [
-    {
-        id: 1,
-        name: 'Hog Cycle',
-        winRate: 68,
-        games: 150,
-        avgElixir: 2.9,
-        cards: [
-            'Hog Rider',
-            'Valkyrie',
-            'Musketeer',
-            'Cannon',
-            'Fireball',
-            'Log',
-            'Ice Spirit',
-            'Skeletons',
-        ],
-    },
-    {
-        id: 2,
-        name: 'Golem Beatdown',
-        winRate: 54,
-        games: 89,
-        avgElixir: 4.2,
-        cards: [
-            'Golem',
-            'Night Witch',
-            'Baby Dragon',
-            'Mega Minion',
-            'Lightning',
-            'Zap',
-            'Tornado',
-            'Lumberjack',
-        ],
-    },
-    {
-        id: 3,
-        name: 'X-Bow Siege',
-        winRate: 62,
-        games: 67,
-        avgElixir: 3.3,
-        cards: ['X-Bow', 'Tesla', 'Archers', 'Knight', 'Ice Golem', 'Log', 'Fireball', 'Skeletons'],
-    },
-    {
-        id: 4,
-        name: 'Miner Control',
-        winRate: 59,
-        games: 92,
-        avgElixir: 3.1,
-        cards: [
-            'Miner',
-            'Poison',
-            'Valkyrie',
-            'Bats',
-            'Spear Goblins',
-            'Ice Spirit',
-            'Skeletons',
-            'Inferno Tower',
-        ],
-    },
-    {
-        id: 5,
-        name: 'Lava Hound',
-        winRate: 56,
-        games: 74,
-        avgElixir: 3.8,
-        cards: [
-            'Lava Hound',
-            'Balloon',
-            'Mega Minion',
-            'Tombstone',
-            'Arrows',
-            'Zap',
-            'Skeleton Army',
-            'Minions',
-        ],
-    },
-    {
-        id: 6,
-        name: 'P.E.K.K.A Bridge',
-        winRate: 61,
-        games: 103,
-        avgElixir: 3.9,
-        cards: [
-            'P.E.K.K.A',
-            'Battle Ram',
-            'Bandit',
-            'Electro Wizard',
-            'Zap',
-            'Poison',
-            'Ghost',
-            'Dark Prince',
-        ],
-    },
-];
+import { useAuth } from '@/api/auth-context';
+import { listDecks, deleteDeck, publishDeck } from '@/api/decks';
+import type { DeckShort, DeckDetails } from '@/api/decks';
+import { CreateDeckModal } from '@/app/components/CreateDeckModal';
 
 export function MyDecks() {
+    const { user } = useAuth();
+    const [decks, setDecks] = useState<DeckShort[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [showCreate, setShowCreate] = useState(false);
+
+    const load = () => {
+        if (!user) return;
+        setLoading(true);
+        listDecks().then(res => setDecks(res.items)).catch(() => {}).finally(() => setLoading(false));
+    };
+
+    useEffect(() => { load(); }, [user]);
+
+    const handleCreated = (deck: DeckDetails) => {
+        setDecks(prev => [{ id: deck.id, name: deck.name, deckType: deck.deckType, strategy: deck.strategy, qualityScore: deck.qualityScore, cards: deck.cards.map(c => ({ id: c.card.id, apiCardId: c.card.apiCardId, name: c.card.name, iconUrl: c.card.iconUrl })) }, ...prev]);
+    };
+
+    const handleDelete = async (deckId: number) => {
+        try {
+            await deleteDeck(deckId);
+            setDecks(prev => prev.filter(d => d.id !== deckId));
+        } catch { }
+    };
+
+    const handlePublish = async (deckId: number) => {
+        try {
+            const result = await publishDeck(deckId);
+            alert(`Deck published! Token: ${result.publicToken}`);
+        } catch { }
+    };
+
     return (
         <div className='space-y-6'>
             <div className='flex items-center justify-between'>
@@ -104,13 +44,28 @@ export function MyDecks() {
                     <h1 className='mb-2'>My Decks</h1>
                     <p className='text-muted-foreground'>Manage your saved deck collections</p>
                 </div>
-                <button className='px-6 py-3 rounded-lg bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all flex items-center gap-2'>
+                <button onClick={() => setShowCreate(true)} disabled={!user} className='px-6 py-3 rounded-lg bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all flex items-center gap-2 disabled:opacity-50'>
                     <Plus className='w-4 h-4' />
                     New Deck
                 </button>
             </div>
 
+            {!user && (
+                <div className='text-center text-muted-foreground py-16 bg-card border border-border rounded-xl'>
+                    Sign in to view your decks
+                </div>
+            )}
+
+            {loading && (
+                <div className='text-center text-muted-foreground py-8'>Loading...</div>
+            )}
+
             <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+                {decks.length === 0 && !loading && user && (
+                    <div className='col-span-full text-center text-muted-foreground py-16 bg-card border border-border rounded-xl'>
+                        No decks yet. Create your first deck!
+                    </div>
+                )}
                 {decks.map((deck) => (
                     <div
                         key={deck.id}
@@ -120,13 +75,12 @@ export function MyDecks() {
                             <div>
                                 <h2 className='mb-1'>{deck.name}</h2>
                                 <div className='flex items-center gap-4 text-sm text-muted-foreground'>
-                                    <span>{deck.games} games</span>
-                                    <span>•</span>
-                                    <span className='text-[#10b981]'>{deck.winRate}% win rate</span>
+                                    <span>{deck.deckType}</span>
+                                    {deck.strategy && <><span>•</span><span className='text-[#10b981]'>{deck.strategy}</span></>}
                                 </div>
                             </div>
                             <div className='px-3 py-1 rounded-full bg-[#8b5cf6]/20 border border-[#8b5cf6]/30'>
-                                <span className='text-[#c4b5fd]'>{deck.avgElixir}</span>
+                                <span className='text-[#c4b5fd]'>{deck.qualityScore?.toFixed(1) ?? '--'}</span>
                             </div>
                         </div>
 
@@ -135,9 +89,13 @@ export function MyDecks() {
                                 <div
                                     key={index}
                                     className='aspect-square rounded-lg bg-gradient-to-br from-[#1e293b] to-[#0f172a] border border-border/50 flex items-center justify-center group-hover:border-primary/30 transition-all shadow-lg'
-                                    title={card}
+                                    title={card.name}
                                 >
-                                    <span className='text-lg'>⚔️</span>
+                                    {card.iconUrl ? (
+                                        <img src={card.iconUrl} alt={card.name} className='w-12 h-12 object-contain' />
+                                    ) : (
+                                        <span className='text-lg'>⚔️</span>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -147,16 +105,17 @@ export function MyDecks() {
                                 <Play className='w-4 h-4' />
                                 Use Deck
                             </button>
-                            <button className='p-2 rounded-lg border border-border bg-background/50 hover:bg-background transition-colors'>
+                            <button onClick={() => handlePublish(deck.id)} className='p-2 rounded-lg border border-border bg-background/50 hover:bg-background transition-colors'>
                                 <Share2 className='w-4 h-4' />
                             </button>
-                            <button className='p-2 rounded-lg border border-border bg-background/50 hover:bg-destructive hover:border-destructive transition-colors group/delete'>
+                            <button onClick={() => handleDelete(deck.id)} className='p-2 rounded-lg border border-border bg-background/50 hover:bg-destructive hover:border-destructive transition-colors group/delete'>
                                 <Trash2 className='w-4 h-4 group-hover/delete:text-destructive-foreground' />
                             </button>
                         </div>
                     </div>
                 ))}
             </div>
+            {showCreate && <CreateDeckModal onClose={() => setShowCreate(false)} onCreated={handleCreated} />}
         </div>
     );
 }

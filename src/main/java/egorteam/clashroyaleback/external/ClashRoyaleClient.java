@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriUtils;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -15,10 +16,12 @@ import java.util.Map;
 @Component
 public class ClashRoyaleClient {
     private final RestClient restClient;
+    private final String baseUrl;
     private final String token;
 
     public ClashRoyaleClient(@Value("${clashroyale.api.base-url}") String baseUrl,
                              @Value("${clashroyale.api.token}") String token) {
+        this.baseUrl = baseUrl;
         this.token = token;
         this.restClient = RestClient.builder().baseUrl(baseUrl).build();
     }
@@ -55,12 +58,12 @@ public class ClashRoyaleClient {
         return UriUtils.encodePathSegment(normalizeTag(playerTag), StandardCharsets.UTF_8);
     }
 
-    private <T> T get(String uri, Class<T> bodyType) {
+    private <T> T get(String path, Class<T> bodyType) {
         if (token == null || token.isBlank()) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Set CLASH_ROYALE_API_TOKEN to call Clash Royale API");
         }
         return restClient.get()
-                .uri(uri)
+                .uri(URI.create(baseUrl + path))
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .retrieve()
                 .onStatus(status -> status.value() == 404,
