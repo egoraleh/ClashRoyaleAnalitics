@@ -1,20 +1,44 @@
 import { useState } from 'react';
 import { Sparkles, RefreshCw, Copy } from 'lucide-react';
-
-const cards = [
-    { name: 'Hog Rider', elixir: 4, type: 'Troop' },
-    { name: 'Valkyrie', elixir: 4, type: 'Troop' },
-    { name: 'Musketeer', elixir: 4, type: 'Troop' },
-    { name: 'Cannon', elixir: 3, type: 'Building' },
-    { name: 'Fireball', elixir: 4, type: 'Spell' },
-    { name: 'Log', elixir: 2, type: 'Spell' },
-    { name: 'Ice Spirit', elixir: 1, type: 'Troop' },
-    { name: 'Skeletons', elixir: 1, type: 'Troop' },
-];
+import { useAuth } from '@/api/auth-context';
+import { generateDeck } from '@/api/ai';
+import type { GeneratedDeckResponse } from '@/api/ai';
 
 export function AIDeckGenerator() {
+    const { user } = useAuth();
     const [playstyle, setPlaystyle] = useState('Cycle');
     const [avgElixir, setAvgElixir] = useState('2.5-3.5');
+    const [result, setResult] = useState<GeneratedDeckResponse | null>(null);
+    const [busy, setBusy] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const parseElixirRange = (range: string): [number, number] => {
+        if (range === '4.5+') return [4.5, 10];
+        const parts = range.split('-');
+        return [parseFloat(parts[0]), parseFloat(parts[1])];
+    };
+
+    const handleGenerate = async () => {
+        if (!user) return;
+        setBusy(true);
+        setError(null);
+        try {
+            const [minElixir, maxElixir] = parseElixirRange(avgElixir);
+            const res = await generateDeck({
+                strategy: playstyle,
+                minElixir,
+                maxElixir,
+                saveResult: true,
+            });
+            setResult(res);
+        } catch (e: unknown) {
+            setError(e instanceof Error ? e.message : 'Generation failed');
+        }
+        setBusy(false);
+    };
+
+    const deck = result?.deck;
+    const cards = deck?.cards ?? [];
 
     return (
         <div className='grid grid-cols-12 gap-6'>
@@ -46,9 +70,7 @@ export function AIDeckGenerator() {
                         </div>
 
                         <div>
-                            <label className='block mb-3 text-muted-foreground'>
-                                Average Elixir
-                            </label>
+                            <label className='block mb-3 text-muted-foreground'>Average Elixir</label>
                             <div className='space-y-2'>
                                 {['2.0-2.5', '2.5-3.5', '3.5-4.5', '4.5+'].map((range) => (
                                     <button
@@ -66,26 +88,15 @@ export function AIDeckGenerator() {
                             </div>
                         </div>
 
-                        <div>
-                            <label className='block mb-3 text-muted-foreground'>
-                                Card Preferences
-                            </label>
-                            <div className='flex flex-wrap gap-2'>
-                                {['Win Condition', 'Tank', 'Spell', 'Building'].map((pref) => (
-                                    <button
-                                        key={pref}
-                                        className='px-3 py-2 rounded-lg border border-border bg-background/50 hover:bg-accent transition-colors text-sm'
-                                    >
-                                        {pref}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <button className='w-full py-3 rounded-lg bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all flex items-center justify-center gap-2'>
+                        <button
+                            onClick={handleGenerate}
+                            disabled={busy || !user}
+                            className='w-full py-3 rounded-lg bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all flex items-center justify-center gap-2 disabled:opacity-50'
+                        >
                             <Sparkles className='w-4 h-4' />
-                            Generate Deck
+                            {busy ? 'Generating...' : 'Generate Deck'}
                         </button>
+                        {!user && <p className='text-sm text-muted-foreground text-center'>Sign in to generate decks</p>}
                     </div>
                 </div>
             </div>
@@ -93,69 +104,87 @@ export function AIDeckGenerator() {
             <div className='col-span-12 lg:col-span-8'>
                 <div className='bg-card border border-border rounded-xl p-6 shadow-xl'>
                     <div className='flex items-center justify-between mb-6'>
-                        <h2>Generated Deck</h2>
+                        <h2>{result ? deck?.name ?? 'Generated Deck' : 'Generated Deck'}</h2>
                         <div className='flex gap-2'>
                             <button className='p-2 rounded-lg border border-border bg-background/50 hover:bg-background transition-colors'>
                                 <Copy className='w-4 h-4' />
                             </button>
-                            <button className='p-2 rounded-lg border border-border bg-background/50 hover:bg-background transition-colors'>
+                            <button onClick={handleGenerate} disabled={busy || !user} className='p-2 rounded-lg border border-border bg-background/50 hover:bg-background transition-colors'>
                                 <RefreshCw className='w-4 h-4' />
                             </button>
                         </div>
                     </div>
 
-                    <div className='grid grid-cols-4 gap-4 mb-6'>
-                        {cards.map((card, index) => (
-                            <div
-                                key={index}
-                                className='aspect-[3/4] rounded-lg bg-gradient-to-br from-[#1e293b] to-[#0f172a] border border-border/50 p-4 flex flex-col items-center justify-center hover:border-primary transition-all group cursor-pointer shadow-lg hover:shadow-primary/20'
-                            >
-                                <div className='w-12 h-12 rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] mb-3 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform'>
-                                    <span className='text-xl'>
-                                        {card.type === 'Troop'
-                                            ? '⚔️'
-                                            : card.type === 'Spell'
-                                                ? '✨'
-                                                : '🏰'}
-                                    </span>
+                    {!result && !error && (
+                        <div className='text-center text-muted-foreground py-16'>
+                            Configure your preferences and generate a deck
+                        </div>
+                    )}
+                    {error && (
+                        <div className='text-center text-red-500 py-4 bg-red-500/10 rounded-lg border border-red-500/30'>
+                            {error}
+                        </div>
+                    )}
+
+                    {result && (
+                        <>
+                            <div className='grid grid-cols-4 gap-4 mb-6'>
+                                {cards.length === 0 && Array.from({ length: 8 }).map((_, index) => (
+                                    <div key={index} className='aspect-[3/4] rounded-lg bg-gradient-to-br from-[#1e293b] to-[#0f172a] border border-border/50 p-3 flex flex-col items-center justify-center shadow-lg'>
+                                        <div className='flex-1 flex items-center justify-center w-full'>
+                                            <div className='w-12 h-12 text-muted-foreground/30'>
+                                                <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' className='w-full h-full'><rect x='3' y='3' width='18' height='18' rx='2'/></svg>
+                                            </div>
+                                        </div>
+                                        <div className='text-muted-foreground text-xs mt-2'>Empty</div>
+                                    </div>
+                                ))}
+                                {cards.length > 0 && cards.map((card, index) => (
+                                    <div
+                                        key={index}
+                                        className='aspect-[3/4] rounded-lg bg-gradient-to-br from-[#1e293b] to-[#0f172a] border border-border/50 p-3 flex flex-col items-center justify-center hover:border-primary transition-all group cursor-pointer shadow-lg hover:shadow-primary/20'
+                                    >
+                                        <div className='flex-1 flex items-center justify-center w-full mb-2'>
+                                            {card.card?.iconUrl ? (
+                                                <img src={card.card.iconUrl} alt={card.card.name} className='w-full h-full object-contain p-2' />
+                                            ) : (
+                                                <span className='text-xl'>⚔️</span>
+                                            )}
+                                        </div>
+                                        <div className='text-center mb-1 text-xs leading-tight'>{card.card?.name ?? `Slot ${card.slotNumber}`}</div>
+                                        <div className='px-2 py-0.5 rounded-full bg-[#8b5cf6]/20 border border-[#8b5cf6]/30'>
+                                            {card.card?.elixir != null && <span className='text-[#c4b5fd] text-xs'>{card.card.elixir}</span>}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className='grid grid-cols-3 gap-4 mb-6'>
+                                <div className='p-4 rounded-lg bg-background/50 border border-border/50'>
+                                    <div className='text-sm text-muted-foreground mb-1'>Avg Elixir</div>
+                                    <div className='text-xl'>{deck?.metrics?.avgElixir?.toFixed(1) ?? '--'}</div>
                                 </div>
-                                <div className='text-center mb-2'>{card.name}</div>
-                                <div className='px-3 py-1 rounded-full bg-[#8b5cf6]/20 border border-[#8b5cf6]/30'>
-                                    <span className='text-[#c4b5fd]'>{card.elixir}</span>
+                                <div className='p-4 rounded-lg bg-background/50 border border-border/50'>
+                                    <div className='text-sm text-muted-foreground mb-1'>Quality Score</div>
+                                    <div className='text-xl text-[#10b981]'>{deck?.qualityScore?.toFixed(0) ?? '--'}</div>
+                                </div>
+                                <div className='p-4 rounded-lg bg-background/50 border border-border/50'>
+                                    <div className='text-sm text-muted-foreground mb-1'>Synergy Score</div>
+                                    <div className='text-xl text-[#06b6d4]'>{result.breakdown?.synergy ?? '--'}</div>
                                 </div>
                             </div>
-                        ))}
-                    </div>
 
-                    <div className='grid grid-cols-3 gap-4 mb-6'>
-                        <div className='p-4 rounded-lg bg-background/50 border border-border/50'>
-                            <div className='text-sm text-muted-foreground mb-1'>Avg Elixir</div>
-                            <div className='text-xl'>2.9</div>
-                        </div>
-                        <div className='p-4 rounded-lg bg-background/50 border border-border/50'>
-                            <div className='text-sm text-muted-foreground mb-1'>Win Rate</div>
-                            <div className='text-xl text-[#10b981]'>68%</div>
-                        </div>
-                        <div className='p-4 rounded-lg bg-background/50 border border-border/50'>
-                            <div className='text-sm text-muted-foreground mb-1'>Synergy Score</div>
-                            <div className='text-xl text-[#06b6d4]'>A+</div>
-                        </div>
-                    </div>
-
-                    <div className='p-4 rounded-lg bg-gradient-to-br from-[#6366f1]/10 to-[#8b5cf6]/10 border border-primary/20'>
-                        <h3 className='mb-2 flex items-center gap-2'>
-                            <Sparkles className='w-4 h-4 text-[#8b5cf6]' />
-                            AI Analysis
-                        </h3>
-                        <p className='text-muted-foreground leading-relaxed'>
-                            This fast-cycle deck excels at applying constant pressure with the Hog
-                            Rider as your primary win condition. Use Valkyrie and Musketeer for
-                            defense, then counter-push. Cannon pulls tanks, while Fireball and Log
-                            handle swarms. Ice Spirit and Skeletons cycle quickly and provide
-                            excellent value trades. Average elixir of 2.9 allows for rapid cycling
-                            and outcycling opponent&apos;s counters.
-                        </p>
-                    </div>
+                            {result.explanation && (
+                                <div className='p-4 rounded-lg bg-gradient-to-br from-[#6366f1]/10 to-[#8b5cf6]/10 border border-primary/20'>
+                                    <h3 className='mb-2 flex items-center gap-2'>
+                                        <Sparkles className='w-4 h-4 text-[#8b5cf6]' />
+                                        AI Analysis
+                                    </h3>
+                                    <p className='text-muted-foreground leading-relaxed'>{result.explanation}</p>
+                                </div>
+                            )}
+                        </>
+                    )}
                 </div>
             </div>
         </div>
