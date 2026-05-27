@@ -13,8 +13,8 @@ export function Layout() {
         { path: '/', label: 'Dashboard', icon: LayoutDashboard },
         { path: '/ai-deck-generator', label: 'AI Deck Generator', icon: Sparkles },
         { path: '/deck-comparison', label: 'Deck Comparison', icon: Swords },
-        { path: '/my-decks', label: 'My Decks', icon: Layers },
-        { path: '/profile', label: 'Profile', icon: User },
+        ...(user ? [{ path: '/my-decks', label: 'My Decks', icon: Layers }] : []),
+        ...(user ? [{ path: '/profile', label: 'Profile', icon: User }] : []),
     ];
 
     return (
