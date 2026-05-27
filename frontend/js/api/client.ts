@@ -37,7 +37,57 @@ class ApiError extends Error {
     }
 }
 
-async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+function getErrorMessage(body: unknown, fallback: string): string {
+    if (typeof body === 'string') {
+        return body || fallback;
+    }
+    if (body && typeof body === 'object') {
+        const data = body as Record<string, unknown>;
+        if (typeof data.message === 'string' && data.message) {
+            return data.message;
+        }
+        if (typeof data.error === 'string' && data.error) {
+            return data.error;
+        }
+    }
+    return fallback;
+}
+
+async function readBody(response: Response): Promise<unknown> {
+    const text = await response.text().catch(() => '');
+    if (!text) {
+        return null;
+    }
+    try {
+        return JSON.parse(text);
+    } catch {
+        return text;
+    }
+}
+
+async function refreshAccessToken(): Promise<string | null> {
+    const { refresh } = getTokens();
+    if (!refresh) {
+        return null;
+    }
+
+    const response = await fetch(`${BASE_URL}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: refresh }),
+    });
+
+    if (!response.ok) {
+        clearTokens();
+        return null;
+    }
+
+    const result = await response.json() as { accessToken: string; refreshToken: string };
+    setTokens(result.accessToken, result.refreshToken);
+    return result.accessToken;
+}
+
+async function request<T>(path: string, options: RequestOptions = {}, retry = true): Promise<T> {
     const { method = 'GET', body, headers = {}, auth = false } = options;
 
     const reqHeaders: Record<string, string> = {
@@ -64,11 +114,15 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     const response = await fetch(`${BASE_URL}${path}`, fetchOptions);
 
     if (!response.ok) {
-        const text = await response.text().catch(() => 'Unknown error');
         if (response.status === 401 && auth) {
+            const token = retry ? await refreshAccessToken() : null;
+            if (token) {
+                return request<T>(path, options, false);
+            }
             clearTokens();
         }
-        throw new ApiError(text || `HTTP ${response.status}`, response.status);
+        const data = await readBody(response);
+        throw new ApiError(getErrorMessage(data, `HTTP ${response.status}`), response.status);
     }
 
     if (response.status === 204) {

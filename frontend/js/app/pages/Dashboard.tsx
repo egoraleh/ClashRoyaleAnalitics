@@ -61,18 +61,6 @@ export function Dashboard() {
 
     const cache = profile?.cache;
 
-    if (!user) {
-        return (
-            <div className='flex items-center justify-center min-h-[60vh]'>
-                <div className='text-center text-muted-foreground bg-card border border-border rounded-xl p-8 shadow-xl'>
-                    <Trophy className='w-12 h-12 mx-auto mb-4 opacity-50' />
-                    <h2 className='mb-2'>Welcome to Royale Analytics</h2>
-                    <p>Sign in to view your Clash Royale stats</p>
-                </div>
-            </div>
-        );
-    }
-
     const trophies = cache?.trophies ?? null;
     const bestTrophies = cache?.bestTrophies ?? null;
     const winRate = cache?.battleStats?.winRate as number | undefined;
@@ -113,6 +101,18 @@ export function Dashboard() {
     })) ?? [];
 
     const chartData = battleChartData ?? (ratingData.length > 0 ? ratingData : null);
+
+    if (!user) {
+        return (
+            <div className='flex items-center justify-center min-h-[60vh]'>
+                <div className='text-center text-muted-foreground bg-card border border-border rounded-xl p-8 shadow-xl'>
+                    <Trophy className='w-12 h-12 mx-auto mb-4 opacity-50' />
+                    <h2 className='mb-2'>Welcome to Royale Analytics</h2>
+                    <p>Sign in to view your Clash Royale stats</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className='grid grid-cols-12 gap-6'>

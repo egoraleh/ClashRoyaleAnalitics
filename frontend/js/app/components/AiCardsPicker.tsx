@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { X, Search } from 'lucide-react';
-import { listCards } from '@/api/cards';
+import { listAllCards } from '@/api/cards';
 import type { Card } from '@/api/cards';
 
 type PickedCard = {
@@ -22,7 +22,7 @@ export function AiCardsPicker({ side, onClose, onPick }: Props) {
     const [selected, setSelected] = useState<Card[]>([]);
 
     useEffect(() => {
-        listCards({ size: 200 }).then(res => setAllCards(res.items)).catch(() => {});
+        listAllCards().then(setAllCards).catch(() => {});
     }, []);
 
     const filtered = allCards.filter(c =>

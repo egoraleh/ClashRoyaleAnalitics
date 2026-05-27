@@ -70,6 +70,7 @@ export async function compareDecks(data: CompareDecksRequest): Promise<OneVsOneR
     return request<OneVsOneResult>('/1v1/compare', {
         method: 'POST',
         body: data,
+        auth: true,
     });
 }
 

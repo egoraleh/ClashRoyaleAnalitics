@@ -41,17 +41,45 @@ export type CardsQuery = {
 
 export async function listCards(query: CardsQuery = {}): Promise<CardsPageResponse> {
     const params = new URLSearchParams();
-    if (query.rarity) params.set('rarity', query.rarity);
-    if (query.elixirMin !== undefined) params.set('elixirMin', String(query.elixirMin));
-    if (query.elixirMax !== undefined) params.set('elixirMax', String(query.elixirMax));
-    if (query.arena !== undefined) params.set('arena', String(query.arena));
-    if (query.search) params.set('search', query.search);
-    if (query.page !== undefined) params.set('page', String(query.page));
-    if (query.size !== undefined) params.set('size', String(query.size));
-    if (query.refresh) params.set('refresh', 'true');
+    if (query.rarity) {
+        params.set('rarity', query.rarity);
+    }
+    if (query.elixirMin !== undefined) {
+        params.set('elixirMin', String(query.elixirMin));
+    }
+    if (query.elixirMax !== undefined) {
+        params.set('elixirMax', String(query.elixirMax));
+    }
+    if (query.arena !== undefined) {
+        params.set('arena', String(query.arena));
+    }
+    if (query.search) {
+        params.set('search', query.search);
+    }
+    if (query.page !== undefined) {
+        params.set('page', String(query.page));
+    }
+    if (query.size !== undefined) {
+        params.set('size', String(query.size));
+    }
+    if (query.refresh) {
+        params.set('refresh', 'true');
+    }
 
     const qs = params.toString();
     return request<CardsPageResponse>(`/cards${qs ? `?${qs}` : ''}`);
+}
+
+export async function listAllCards(query: Omit<CardsQuery, 'page' | 'size'> = {}): Promise<Card[]> {
+    const firstPage = await listCards({ ...query, page: 0, size: 200 });
+    const items = [...firstPage.items];
+
+    for (let page = 1; page < firstPage.totalPages; page += 1) {
+        const nextPage = await listCards({ ...query, page, size: firstPage.size });
+        items.push(...nextPage.items);
+    }
+
+    return items;
 }
 
 export async function getCard(cardId: number): Promise<Card> {

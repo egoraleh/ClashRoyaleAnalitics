@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { X, Search } from 'lucide-react';
-import { listCards } from '@/api/cards';
+import { listAllCards } from '@/api/cards';
 import { createDeck } from '@/api/decks';
 import type { Card } from '@/api/cards';
 import type { DeckDetails, DeckCardInput } from '@/api/decks';
@@ -20,7 +20,7 @@ export function CreateDeckModal({ onClose, onCreated }: Props) {
     const [busy, setBusy] = useState(false);
 
     useEffect(() => {
-        listCards({ size: 100 }).then(res => setAllCards(res.items)).catch(() => {});
+        listAllCards().then(setAllCards).catch(() => {});
     }, []);
 
     const filtered = allCards.filter(c =>
